@@ -224,7 +224,7 @@ rogue-town/
 - GitHub リポジトリ: `stndbym1-dev/game`
 - リポジトリ内の配置: `rogue-town/index.html`
 - GitHub Pages の想定実行 URL: `https://stndbym1-dev.github.io/game/rogue-town/`
-- ローカルで編集するフォルダ: `C:\Users\stndb\game\rogue-town`
+- ローカルで編集するフォルダ: `C:\Users\stndb\GitHub\game\rogue-town`
 
 ## 13. 変更時の確認事項
 
