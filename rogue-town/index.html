@@ -74,6 +74,8 @@
     let gameClear = false;
     let paused = false;
     let levelUpNotice = false;
+    let levelUpFrom = 1;
+    let levelUpTo = 2;
     let changingKey = null;
 
     const moveKeys = {
@@ -332,7 +334,7 @@
             vx: Math.cos(attackAngle),
             vy: Math.sin(attackAngle),
             speed: enemy.boss ? 4.5 : 3,
-            damage: enemy.damage,
+            damage: enemy.boss ? 16 : enemy.damage,
             size: enemy.boss ? 24 : 6,
             boss: enemy.boss
           });
@@ -537,6 +539,7 @@
     function checkLevelUp() {
 
       let leveledUp = false;
+      let firstLevel = player.level;
 
       while (player.exp >= player.expToNext) {
 
@@ -557,6 +560,8 @@
       }
 
       if (leveledUp) {
+        levelUpFrom = firstLevel;
+        levelUpTo = player.level;
         paused = true;
         levelUpNotice = true;
       }
@@ -1007,7 +1012,7 @@
       ctx.fillText("LEVEL UP!!", canvas.width / 2, canvas.height / 2 - 115);
       ctx.fillStyle = "white";
       ctx.font = "24px sans-serif";
-      ctx.fillText(`レベル: +1`, canvas.width / 2, canvas.height / 2 - 60);
+      ctx.fillText(`レベル: ${levelUpFrom} → ${levelUpTo}`, canvas.width / 2, canvas.height / 2 - 60);
       ctx.fillText(`攻撃力: +5`, canvas.width / 2, canvas.height / 2 - 25);
       ctx.fillText(`最大HP: +10`, canvas.width / 2, canvas.height / 2 + 10);
       ctx.fillText("HP: 全回復", canvas.width / 2, canvas.height / 2 + 45);
