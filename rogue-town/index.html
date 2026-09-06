@@ -73,6 +73,8 @@
     let gameOver = false;
     let gameClear = false;
     let paused = false;
+    let levelUpNotice = false;
+    let levelUpNoticeUntil = 0;
     let changingKey = null;
 
     const moveKeys = {
@@ -136,6 +138,12 @@
 
     window.addEventListener("keydown", (event) => {
       const key = event.key.toLowerCase();
+
+      if (levelUpNotice) {
+        event.preventDefault();
+        dismissLevelUpNotice();
+        return;
+      }
 
       if (changingKey) {
         event.preventDefault();
@@ -322,7 +330,7 @@
             vy: Math.sin(attackAngle),
             speed: enemy.boss ? 4 : 3,
             damage: enemy.damage,
-            size: enemy.boss ? 9 : 6
+            size: enemy.boss ? 24 : 6
           });
         }
       }
@@ -501,6 +509,8 @@
 
     function checkLevelUp() {
 
+      let leveledUp = false;
+
       while (player.exp >= player.expToNext) {
 
         player.exp -= player.expToNext;
@@ -515,7 +525,20 @@
         player.hp = player.maxHp;
 
         player.speed += 0.15;
+
+        leveledUp = true;
       }
+
+      if (leveledUp) {
+        paused = true;
+        levelUpNotice = true;
+        levelUpNoticeUntil = performance.now() + 1000;
+      }
+    }
+
+    function dismissLevelUpNotice() {
+      levelUpNotice = false;
+      paused = false;
     }
 
     // ==============================
@@ -943,6 +966,25 @@
       ctx.textAlign = "left";
     }
 
+    function drawLevelUpNotice() {
+
+      if (!levelUpNotice) {
+        return;
+      }
+
+      ctx.fillStyle = "rgba(0,0,0,0.62)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#ffeaa7";
+      ctx.font = "bold 64px sans-serif";
+      ctx.fillText("LEVEL UP!!", canvas.width / 2, canvas.height / 2 - 10);
+      ctx.fillStyle = "white";
+      ctx.font = "20px sans-serif";
+      ctx.fillText("1秒待つか、キーを押して再開", canvas.width / 2, canvas.height / 2 + 38);
+      ctx.textAlign = "left";
+    }
+
     // ==============================
     // メインゲームループ
     // ==============================
@@ -961,6 +1003,10 @@
       }
 
       const gameNow = startTime + gameElapsed;
+
+      if (levelUpNotice && now >= levelUpNoticeUntil) {
+        dismissLevelUpNotice();
+      }
 
       drawTown();
 
@@ -994,6 +1040,8 @@
       drawUI(gameNow);
 
       drawPauseScreen();
+
+      drawLevelUpNotice();
 
       if (gameOver || gameClear) {
         drawEndScreen();
