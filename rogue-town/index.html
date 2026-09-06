@@ -74,7 +74,6 @@
     let gameClear = false;
     let paused = false;
     let levelUpNotice = false;
-    let levelUpNoticeUntil = 0;
     let changingKey = null;
 
     const moveKeys = {
@@ -139,9 +138,13 @@
     window.addEventListener("keydown", (event) => {
       const key = event.key.toLowerCase();
 
-      if (levelUpNotice) {
+      if (levelUpNotice && key === " ") {
         event.preventDefault();
         dismissLevelUpNotice();
+        return;
+      }
+
+      if (levelUpNotice) {
         return;
       }
 
@@ -328,9 +331,10 @@
             y: enemy.y,
             vx: Math.cos(attackAngle),
             vy: Math.sin(attackAngle),
-            speed: enemy.boss ? 4 : 3,
+            speed: enemy.boss ? 4.5 : 3,
             damage: enemy.damage,
-            size: enemy.boss ? 24 : 6
+            size: enemy.boss ? 24 : 6,
+            boss: enemy.boss
           });
         }
       }
@@ -393,6 +397,29 @@
       for (let i = bullets.length - 1; i >= 0; i--) {
 
         const bullet = bullets[i];
+
+        let hitByEnemyBullet = false;
+
+        for (const enemyBullet of enemyBullets) {
+          if (!enemyBullet.boss) {
+            continue;
+          }
+
+          const distanceFromEnemyBullet = Math.hypot(
+            enemyBullet.x - bullet.x,
+            enemyBullet.y - bullet.y
+          );
+
+          if (distanceFromEnemyBullet < bullet.size + enemyBullet.size) {
+            hitByEnemyBullet = true;
+            break;
+          }
+        }
+
+        if (hitByEnemyBullet) {
+          bullets.splice(i, 1);
+          continue;
+        }
 
         // ターゲットがすでに倒されている場合
         if (!enemies.includes(bullet.target)) {
@@ -532,7 +559,6 @@
       if (leveledUp) {
         paused = true;
         levelUpNotice = true;
-        levelUpNoticeUntil = performance.now() + 1000;
       }
     }
 
@@ -977,11 +1003,17 @@
 
       ctx.textAlign = "center";
       ctx.fillStyle = "#ffeaa7";
-      ctx.font = "bold 64px sans-serif";
-      ctx.fillText("LEVEL UP!!", canvas.width / 2, canvas.height / 2 - 10);
+      ctx.font = "bold 56px sans-serif";
+      ctx.fillText("LEVEL UP!!", canvas.width / 2, canvas.height / 2 - 115);
       ctx.fillStyle = "white";
-      ctx.font = "20px sans-serif";
-      ctx.fillText("1秒待つか、キーを押して再開", canvas.width / 2, canvas.height / 2 + 38);
+      ctx.font = "24px sans-serif";
+      ctx.fillText(`レベル: +1`, canvas.width / 2, canvas.height / 2 - 60);
+      ctx.fillText(`攻撃力: +5`, canvas.width / 2, canvas.height / 2 - 25);
+      ctx.fillText(`最大HP: +10`, canvas.width / 2, canvas.height / 2 + 10);
+      ctx.fillText("HP: 全回復", canvas.width / 2, canvas.height / 2 + 45);
+      ctx.fillText(`移動速度: +0.15`, canvas.width / 2, canvas.height / 2 + 80);
+      ctx.font = "18px sans-serif";
+      ctx.fillText("スペースキーで再開", canvas.width / 2, canvas.height / 2 + 130);
       ctx.textAlign = "left";
     }
 
@@ -1003,10 +1035,6 @@
       }
 
       const gameNow = startTime + gameElapsed;
-
-      if (levelUpNotice && now >= levelUpNoticeUntil) {
-        dismissLevelUpNotice();
-      }
 
       drawTown();
 
