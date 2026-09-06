@@ -74,6 +74,8 @@
     let gameClear = false;
     let paused = false;
     let levelUpNotice = false;
+    let bossNotice = false;
+    let bossNoticeUntil = 0;
     let levelUpFrom = 1;
     let levelUpTo = 2;
     let changingKey = null;
@@ -164,6 +166,10 @@
       }
 
       if (levelUpNotice) {
+        return;
+      }
+
+      if (bossNotice) {
         return;
       }
 
@@ -634,6 +640,9 @@
         bossSpawned = true;
 
         spawnEnemy(true);
+        paused = true;
+        bossNotice = true;
+        bossNoticeUntil = performance.now() + 1000;
       }
     }
 
@@ -1052,6 +1061,22 @@
       ctx.textAlign = "left";
     }
 
+    function drawBossNotice() {
+
+      if (!bossNotice) {
+        return;
+      }
+
+      ctx.fillStyle = "rgba(0,0,0,0.62)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#f1c40f";
+      ctx.font = "bold 56px sans-serif";
+      ctx.fillText("Boss has appeared !!", canvas.width / 2, canvas.height / 2);
+      ctx.textAlign = "left";
+    }
+
     // ==============================
     // メインゲームループ
     // ==============================
@@ -1070,6 +1095,11 @@
       }
 
       const gameNow = startTime + gameElapsed;
+
+      if (bossNotice && now >= bossNoticeUntil) {
+        bossNotice = false;
+        paused = false;
+      }
 
       drawTown();
 
@@ -1105,6 +1135,8 @@
       drawPauseScreen();
 
       drawLevelUpNotice();
+
+      drawBossNotice();
 
       if (gameOver || gameClear) {
         drawEndScreen();
