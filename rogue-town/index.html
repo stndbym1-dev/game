@@ -83,6 +83,8 @@
     };
 
     let startTime = performance.now();
+    let gameElapsed = 0;
+    let previousFrameTime = null;
 
     let bossSpawned = false;
 
@@ -947,17 +949,30 @@
 
     function gameLoop(now) {
 
+      if (previousFrameTime === null) {
+        previousFrameTime = now;
+      }
+
+      const frameDelta = now - previousFrameTime;
+      previousFrameTime = now;
+
+      if (!paused && !gameOver && !gameClear) {
+        gameElapsed += frameDelta;
+      }
+
+      const gameNow = startTime + gameElapsed;
+
       drawTown();
 
       if (!gameOver && !gameClear && !paused) {
 
         updatePlayer();
 
-        handleEnemySpawning(now);
+        handleEnemySpawning(gameNow);
 
-        updateEnemies(now);
+        updateEnemies(gameNow);
 
-        autoAttack(now);
+        autoAttack(gameNow);
 
         updateBullets();
 
@@ -976,7 +991,7 @@
 
       drawPlayer();
 
-      drawUI(now);
+      drawUI(gameNow);
 
       drawPauseScreen();
 
