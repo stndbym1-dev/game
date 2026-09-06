@@ -85,6 +85,23 @@
       right: "d"
     };
 
+    const moveKeysStorageKey = "rogueTownMoveKeys";
+
+    try {
+      const savedMoveKeys = JSON.parse(
+        localStorage.getItem(moveKeysStorageKey)
+      );
+
+      if (savedMoveKeys && typeof savedMoveKeys === "object") {
+        for (const direction of Object.keys(moveKeys)) {
+          if (typeof savedMoveKeys[direction] === "string") {
+            moveKeys[direction] = savedMoveKeys[direction];
+          }
+        }
+      }
+    } catch (error) {
+    }
+
     let startTime = performance.now();
     let gameElapsed = 0;
     let previousFrameTime = null;
@@ -159,6 +176,7 @@
 
         if (!otherDirection) {
           moveKeys[changingKey] = key;
+          saveMoveKeys();
           updateKeyButtons();
           changingKey = null;
         }
@@ -204,12 +222,24 @@
       }
     }
 
+    function saveMoveKeys() {
+      try {
+        localStorage.setItem(
+          moveKeysStorageKey,
+          JSON.stringify(moveKeys)
+        );
+      } catch (error) {
+      }
+    }
+
     for (const button of document.querySelectorAll(".key-setting")) {
       button.addEventListener("click", () => {
         changingKey = button.dataset.direction;
         button.textContent = "キーを入力...";
       });
     }
+
+    updateKeyButtons();
 
     // ==============================
     // プレイヤー移動
